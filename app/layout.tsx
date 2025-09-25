@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import QueryProviders from "@/providers/query-provider";
+import {ClerkProvider} from "@clerk/nextjs"
+import {SidebarInset, SidebarProvider,SidebarTrigger } from "@/components/ui/sidebar";
+import { Providers } from "@/providers/LbProvider";
+import { AppSidebar } from "@/components/app-sidebar";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,12 +27,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <ClerkProvider
+    appearance={{cssLayerName:'clerk'}}
+    >
+       <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SidebarProvider>
+          
+        <QueryProviders>
+          <Providers>
+         
+          <div className="flex flex-col fixed inset-0 overflow-hidden">
+            
+           {children}
+          </div>
+          
+        
+        </Providers>
+        </QueryProviders>
+        
+        </SidebarProvider>
+        
+       
+       
       </body>
     </html>
+    </ClerkProvider>
+   
   );
 }

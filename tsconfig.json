@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
+    
     "target": "ES2017",
+    "types":["bun-types","react","react-dom"],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -22,6 +24,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/api/[[...route]]/websocket.ts"],
   "exclude": ["node_modules"]
 }

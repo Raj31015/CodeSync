@@ -1,21 +1,57 @@
+/* Add this line to the top of the file */
+@layer theme, base, clerk, components, utilities;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root{
+  --bg-main:#212330;
+  --destructive: 0 100% 50%; 
 }
-
-@media (prefers-color-scheme: dark) {
+body{
+  background-color: var(--bg-main);
+  color: white;
+}
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --sidebar-background:0 0% 98%;
+    --sidebar-foreground:240 5.3% 26.1%;
+    --sidebar-primary:240 5.9% 10%;
+    --sidebar-primary-foreground:0 0% 98%;
+    --sidebar-accent:240 4.8% 95.9%;
+    --sidebar-accent-foreground:240 5.9% 10%;
+    --sidebar-border:220 13% 91%;
+    --sidebar-ring:217.2 91.2% 59.8%; 
   }
+  .dark {
+    --sidebar-background:240 5.9% 10%;
+    --sidebar-foreground:240 4.8% 95.9%;
+    --sidebar-primary:224.3 76.3% 48%;
+    --sidebar-primary-foreground:0 0% 100%;
+    --sidebar-accent:240 3.7% 15.9%;
+    --sidebar-accent-foreground:240 4.8% 95.9%;
+    --sidebar-border:240 3.7% 15.9%;
+    --sidebar-ring:217.2 91.2% 59.8%; 
+  } 
+}
+@layer base {
+  * {
+    @apply border-border; 
+  }
+  body {
+    @apply bg-background text-foreground; 
+  } 
+}
+/* styles/globals.css or component styles */
+.cm-tooltip-autocomplete {
+  background-color: #2d2f45 !important; /* 🎨 your custom background */
+  color: white; /* optional: text color */
+  border: 1px solid #555; /* optional: border color */
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Optional: highlight selected suggestion */
+.cm-tooltip-autocomplete .cm-completionLabel:hover,
+.cm-tooltip-autocomplete .cm-completionLabel[aria-selected="true"] {
+  background-color: #44475a !important; /* selected item bg */
+  color: white;
 }

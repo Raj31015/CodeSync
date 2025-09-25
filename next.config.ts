@@ -1,7 +1,17 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  experimental: {
+    esmExternals: true,
+    
+  },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.worker\.js$/,
+      type: 'asset/resource',
+    });
+    return config;
+  },
+}
 
-export default nextConfig;
+export default nextConfig
