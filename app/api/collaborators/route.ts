@@ -1,9 +1,9 @@
-'use server'
+'use server';
 
-import { auth ,clerkClient} from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
 import { collaborators, apps } from "@/db/schema";
-import { inArray, ne, eq, and,sql } from "drizzle-orm";
+import { inArray, ne, eq, and, sql } from "drizzle-orm";
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -11,12 +11,11 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-
   const { appIds } = await req.json();
   if (!appIds?.length) {
-    return new Response(JSON.stringify([])),{status:200};
+    // ✅ fixed here
+    return new Response(JSON.stringify([]), { status: 200 });
   }
-
 
   const allCollaborators = await db
     .select({
@@ -33,18 +32,14 @@ export async function POST(req: Request) {
         ne(collaborators.userId, userId)
       )
     )
-   .groupBy(collaborators.userId);
-    console.log(allCollaborators)
-     if (!allCollaborators.length) {
+    .groupBy(collaborators.userId);
+
+  if (!allCollaborators.length) {
     return new Response(JSON.stringify([]), { status: 200 });
   }
-  
-  
-  
 
-  
-  const client = await clerkClient()
-  const clerkUsers=await client.users.getUserList({
+  const client = await clerkClient();
+  const clerkUsers = await client.users.getUserList({
     userId: allCollaborators.map(c => c.collaboratorId),
   });
 
@@ -56,10 +51,10 @@ export async function POST(req: Request) {
       role: c.roles[i],
     }));
     return {
-      collabId:c.collaboratorId,
+      collabId: c.collaboratorId,
       username: u?.username || "",
-      realname:`${u?.firstName ?? ""} ${u?.lastName ?? ""}`.trim() || "",
-      apps
+      realname: `${u?.firstName ?? ""} ${u?.lastName ?? ""}`.trim() || "",
+      apps,
     };
   });
 
