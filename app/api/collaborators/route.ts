@@ -4,12 +4,7 @@ import { auth ,clerkClient} from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
 import { collaborators, apps } from "@/db/schema";
 import { inArray, ne, eq, and,sql } from "drizzle-orm";
-type allCollaborator = {
-  collaboratorId: string;
-  appIds: string[];
-  roles: string[];
-  appNames: string[];
-};
+
 export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) {

@@ -1,8 +1,8 @@
 // app/api/files/[fileId]/route.ts
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
-import { files, apps } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { files} from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(
   req: Request,
