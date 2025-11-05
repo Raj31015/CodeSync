@@ -91,7 +91,7 @@ export async function PATCH(req: Request) {
   const body = await req.json();
   const res = schema.safeParse(body);
   if (!res.success) {
-    return Response.json({ error: res.error.format() }, { status: 400 });
+    return Response.json({ error: res.error }, { status: 400 });
   }
 
   const { name, folderId } = res.data;

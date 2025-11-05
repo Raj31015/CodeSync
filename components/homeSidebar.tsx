@@ -1,13 +1,13 @@
 "use client"
 import { useState } from "react"
-import { Calendar, Inbox, Home, Search, Settings } from "lucide-react"
+import { Calendar, Inbox, Home, Search, Settings,Folder,Users } from "lucide-react"
 //todo : is selected and all
 const items = [
-  { title: "Home", icon: Home, url: "#" },
-  { title: "Inbox", icon: Inbox, url: "#" },
-  { title: "Calendar", icon: Calendar, url: "#" },
-  { title: "Search", icon: Search, url: "#" },
-  { title: "Settings", icon: Settings, url: "#" },
+  { title: "Home", icon: Home, url: "/" },
+  { title: "Apps", icon: Folder, url: "/project" },
+  { title: "Collaborators", icon: Users, url: "/collaborators" },
+
+  { title: "Inbox", icon:Inbox, url: "/Inbox" },
 ]
 
 export default function Sidebar() {

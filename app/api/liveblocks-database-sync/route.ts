@@ -2,9 +2,7 @@ import { WebhookHandler } from "@liveblocks/node";
 import {createClient} from "@supabase/supabase-js"
 import * as Y from "yjs"
 // Add your signing key from a project's webhooks dashboard
-const WEBHOOK_SECRET = "whsec_oAhMbk1wPxqnUAJhAiNsQyV3qR4bdxAH";
-const webhookHandler = new WebhookHandler(WEBHOOK_SECRET);
-const API_SECRET = "sk_dev_kufZC3B6rOd2Tx3vyd-D6m2roaDFLwPGbVGgnQ4eiTDZY9n8_-WVDWJn0_9DHIZz"
+const webhookHandler = new WebhookHandler(process.env.WEBHOOK_SECRET!);
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -35,7 +33,7 @@ export async function POST(request: Request) {
     const { roomId } = event.data;
      const url = `https://api.liveblocks.io/v2/rooms/${roomId}/ydoc`;
     const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${API_SECRET}` },
+      headers: { Authorization: `Bearer ${process.env.API_SECRET}` },
     });
 
     if (!response.ok) {

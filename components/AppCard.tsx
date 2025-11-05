@@ -11,19 +11,18 @@ import { useState } from "react";
 import { useDeleteApp } from "@/features/apps/api/useDeleteApp";
 import { useConfirm } from "@/hooks/useConfirm";
 import { useRouter } from "next/navigation";
-type AppProps={
-    name:string,
-    date:Date,
-    appId:string
-}
+import { App } from "@/app/api/project/route";
 type formValues={
     name:string,
     appId:string
 }
-export function AppCard({name,date,appId}:AppProps){
+type AppCardProps={
+    app:App
+}
+export function AppCard({app}:AppCardProps){
     const router=useRouter()
     const handleOpenApp=()=>{
-        router.push(`/project/${appId}`)
+        router.push(`/project/${app.appId}`)
     }
     const[edit,setEdit]=useState(false)
     const deleteMutation=useDeleteApp()
@@ -31,9 +30,7 @@ export function AppCard({name,date,appId}:AppProps){
         const onDelete=async()=>{
             const ok=await confirm();
             if(ok){
-                deleteMutation.mutate({appId},{
-                    
-                });
+                deleteMutation.mutate({appId:app.appId});
             }
         }
     const mutation=useEditApp()
@@ -45,26 +42,6 @@ export function AppCard({name,date,appId}:AppProps){
     )
 
     }
-  const App=useGetApp(appId)
-  console.log(App.data?.username)
-    if(App.isLoading || !App.data){
-        return(
-            
-            <div className="bg-slate-300/10 w-full h-[100px] p-6">
-                <div>
-                    <Skeleton className="h-4 w-[250px]"/>
-                    
-                </div>
-                <div>
-                    <Skeleton className="h-4 w-[200px]"/>
-                </div>
-                <div>
-                    <Skeleton className="h-4 w-[150px]"/>
-
-                </div>
-            </div>
-        )
-    }
     return (
         <>
         <ConfirmDialog/>
@@ -74,20 +51,20 @@ export function AppCard({name,date,appId}:AppProps){
             <div>
                 {edit?
                 
-                 <EditAppForm onSubmit={(values)=>{handleSubmit(values)}} defaultValues={{name:"",appId}}/>
+                 <EditAppForm onSubmit={(values)=>{handleSubmit(values)}} defaultValues={{name:"",appId:app.appId}}/>
                 
                 :
                 <div>
-                    {name}
+                    {app.name}
                 </div>
                 }
 
                 
                 <div>
-                    {formatDistanceToNow(date,{addSuffix:true})}
+                   updated {formatDistanceToNow(app.updatedAt,{addSuffix:true})}
                 </div>
                 <div>
-                    by {App.data.username}
+                    created by {app.username}
                 </div>
             </div>
                 

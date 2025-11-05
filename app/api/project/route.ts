@@ -1,15 +1,18 @@
 
-import {auth,currentUser} from "@clerk/nextjs/server";
+import {auth,currentUser,clerkClient} from "@clerk/nextjs/server";
 import {createId} from "@paralleldrive/cuid2"
 import { db } from "@/db/drizzle";
 import { apps, collaborators } from "@/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray,desc } from "drizzle-orm";
 import { insertAppSchema } from "@/db/schema";
 import { Getrole } from "@/hooks/getrole";
-export async function GET(){
+export async function GET(req:Request){
+  const {searchParams}=new URL(req.url)
+ const limitParam = searchParams.get("limit");
+  const limit = limitParam ? Number(limitParam) : undefined;
 
   const  userId = (await auth()).userId;
-
+  
   if (!userId) {
     return new Response(JSON.stringify({ authenticated: false }), {
       status: 401,
@@ -19,22 +22,41 @@ export async function GET(){
                 .from(collaborators)
                 .where(eq(collaborators.userId,userId))
   const appIds = Applist.map((row) => row.appId);
+ 
     if (appIds.length === 0) {
     return new Response(JSON.stringify({ data: [] }));
   }
-  const applist=db.select({
+
+  const applist= db.select({
     name:apps.name,
     appId:apps.appId,
-    date:apps.createdAt,
+    userId:apps.userId,
+    createdAt:apps.createdAt,
     updatedAt:apps.updatedAt,
     updatedBy:apps.updatedBy
   }).from(apps)
     .where(
           inArray(apps.appId,appIds)
         )
-        .orderBy(apps.updatedAt)
+        .orderBy(desc(apps.updatedAt))
+    if(limit){
+      applist.limit(limit)
+    }
   const data= await applist
- return new Response(JSON.stringify({data}))
+  const client = await clerkClient()
+    const clerkUsers=await client.users.getUserList({
+    userId: data.map(c => c.userId),
+  });
+
+  const finaldata = data.map((app)=> {
+    const u=clerkUsers.data.find(u => u.id === app.userId)?.username;
+    return {
+    ...app,
+    username:u ??"unknown" 
+    }
+  });
+    
+ return new Response(JSON.stringify(finaldata))
 }
 export async function POST(req:Request){
   
@@ -46,7 +68,7 @@ export async function POST(req:Request){
     });
   }
   const user=await currentUser()
-    if(!user?.firstName){
+    if(!user?.username){
       throw new Error("user needs to be signed in")
     }
   
@@ -64,20 +86,29 @@ export async function POST(req:Request){
     userId:userId,
     name:name,
     updatedAt:new Date(),
-    updatedBy:user.firstName
+    updatedBy:user.username
 
     
 
   }).returning()
   const participants =await db.insert(collaborators).values({
     userId:userId,
+    collabId:createId(),
     app_id:appId,
     role:"owner"
   })
    return new Response(JSON.stringify({data}))
 
 }
-export type App=typeof apps.$inferSelect
+export type App={
+  appId: string
+  name: string
+  createdAt: string | Date
+  updatedAt: string | Date
+  updatedBy: string
+  userId?: string
+  username: string
+}
 export async function PATCH(req:Request){
  const  userId = (await auth()).userId;
   
@@ -95,7 +126,7 @@ export async function PATCH(req:Request){
   }
   const {appId,name}=res.data
  const role=await Getrole(appId,userId)
-if (role !== "owner") {
+if (role === "viewer") {
   return Response.json({ error: "Unauthorized" }, { status: 403 });
 }
 

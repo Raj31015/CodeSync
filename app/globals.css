@@ -4,8 +4,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 :root{
-  --bg-main:#212330;
+  --bg-main:#1a1d2e;
   --destructive: 0 100% 50%; 
 }
 body{

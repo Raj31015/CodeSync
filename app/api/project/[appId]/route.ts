@@ -10,10 +10,14 @@ export async function GET(req:Request,{params}:{params:Promise<{appId:string}>})
       status: 401,
     });
   }
-    const user=await (await clerkClient()).users.getUser(userId)
+  const {appId}=await params
+  const [appOwner]=await db.select({appUser:apps.userId})
+  .from(apps)
+  .where(eq(apps.appId,appId))
+    const user=await (await clerkClient()).users.getUser(appOwner.appUser)
     const username=user.username
 
-const {appId}=await params
+
  
   const [data]=await db.select({
     name:apps.name,

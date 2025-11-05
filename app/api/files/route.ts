@@ -1,8 +1,8 @@
 import { auth,currentUser } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
-import { files ,apps} from "@/db/schema";
+import { files ,apps,collaborators} from "@/db/schema";
 import { createId } from "@paralleldrive/cuid2";
-import { eq ,desc} from "drizzle-orm";
+import { eq ,desc,and} from "drizzle-orm";
 import { insertFileSchema } from "@/db/schema";
 export type File = typeof files.$inferSelect;
 
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   
   if (!userId) return new Response(JSON.stringify({ authenticated: false }), { status: 401 });
   const user=await currentUser()
-  if(!user?.firstName){
+  if(!user?.username){
     throw new Error("user needs to be signed in")
   }
 
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     .update(apps)
     .set({
         updatedAt:new Date(),
-        updatedBy:user.firstName,
+        updatedBy:user.username,
     })
   return new Response(JSON.stringify({ data }));
 }
@@ -85,7 +85,7 @@ export async function PATCH(req: Request) {
   const userId = (await auth()).userId;
   if (!userId) return new Response(JSON.stringify({ authenticated: false }), { status: 401 });
 const user=await currentUser()
-  if(!user?.firstName){
+  if(!user?.username){
     throw new Error("user needs to be signed in")
   }
 
@@ -117,7 +117,7 @@ const user=await currentUser()
     .update(apps)
     .set({
         updatedAt:new Date(),
-        updatedBy:user.firstName,
+        updatedBy:user.username,
     })
   return new Response(JSON.stringify({ data }));
 }
@@ -133,8 +133,21 @@ export async function DELETE(req: Request) {
   if (!res.success) {
     return Response.json({ error: res.error.format() }, { status: 400 });
   }
-
   const { fileId } = res.data;
+  // const result = await db
+  //   .select({ role: collaborators.role })
+  //   .from(collaborators)
+  //   .where(
+  //     and(
+  //       eq(collaborators.userId, userId),
+  //       eq(collaborators.app_id, appId)
+  //     )
+  //   );
+  
+  // if (!result[0] || result[0].role !== "owner") {
+  //   return Response.json({ error: "Unauthorized" }, { status: 403 });
+  // }
+
   const data = await db
     .delete(files)
     .where(eq(files.fileId, fileId))

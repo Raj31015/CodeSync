@@ -6,20 +6,18 @@ import { AppForm } from "@/features/apps/components/appForm";
 import { useCreateApp } from "@/features/apps/api/useCreateApp";
 import { useGetApps } from "@/features/apps/api/useGetApps";
 import { UserButton } from "@clerk/nextjs";
+import { App } from "./api/project/route";
 import { Separator } from "@/components/ui/separator";
 import HomeSidebar from "@/components/homeSidebar";
 //todo enhance recent app card show update by some at some
+
 export default function Home() {
   type formvalues={
     name:string
   }
-  type AppProps={
-    name:string,
-    date:Date,
-    appId:string
-}
+  
 
-  const Appsquery=useGetApps()
+  const Appsquery=useGetApps(6)
   const apps=Appsquery.data
   const mutation=useCreateApp()
   const {user}=useUser()
@@ -53,10 +51,10 @@ export default function Home() {
         </div>
       
        <h1 className="text-4xl m-6">Recent Apps</h1>
-        <div className=" flex flex-col w-full lg:flex-row gap-4 px-4">
-           {apps.map((app:AppProps)=>{
+        <div className=" flex flex-col w-full lg:grid grid-cols-2 grid-rows-3 gap-4 px-4">
+           {apps?.map((app:App)=>{
             return(
-              <AppCard key={app.appId} name={app.name} date={new Date(app.date)} appId={app.appId} />
+              <AppCard key={app.appId} app={app} />
             )
             })
           }    
