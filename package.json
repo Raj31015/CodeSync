@@ -5,8 +5,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:next": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev:next": "next dev",
+    "build": "next build",
     "start": "next start",
     "build:server": "tsc -p tsconfig.server.json",
     "start:server": "node dist/server.js"
