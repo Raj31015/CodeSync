@@ -1,10 +1,6 @@
 
 
 {
-  
-  "engines": {
-    "node": "18.x"
-  },
   "name": "codesync",
   "version": "0.1.0",
   "private": true,
