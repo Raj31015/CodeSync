@@ -1,6 +1,9 @@
 
 
 {
+  "overrides": {
+    "inotify":false
+  },
   "engines": {
     "node": "18.x"
   },
