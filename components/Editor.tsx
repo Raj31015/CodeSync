@@ -52,7 +52,7 @@ export function CollaborativeEditor({ file }: Props) {
 
   const userInfo = useSelf((me) => me.info);
   useEffect(() => {
-  const socket = io("http://localhost:4000"); // your Next+Socket.IO server
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!,{transports:["websockets"]}); // your Next+Socket.IO server
   socketRef.current=socket
   socketRef.current.on("connect", () => {
     console.log("🟢 Connected to server:", socket.id);

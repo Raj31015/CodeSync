@@ -1,96 +1,67 @@
-import { spawn, ChildProcessWithoutNullStreams } from "child_process";
+import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 import { LANGUAGES } from "./languages";
 import type { Socket } from "socket.io";
 
-type RunRequest = {
-  language: string;
-  code: string;
-  input?: string;
-};
+import { ChildProcessWithoutNullStreams } from "child_process";
 
-const activeProcesses = new Map<string, ChildProcessWithoutNullStreams>();
-
-export async function runCodeSandboxed(socket: Socket, { language, code, input = "" }: RunRequest) {
+export async function runCodeSandboxed(
+  socket: Socket,
+  { language, code }: { language: string; code: string }
+) {
   const lang = LANGUAGES[language];
-  if (!lang) throw new Error(`Unsupported language: ${language}`);
+  if (!lang) throw new Error("Unsupported language");
 
   const tempDir = path.join(process.cwd(), "temp", socket.id);
-  
-
-const fileName =
-  language === "java"
-    ? `${code.match(/\bpublic\s+class\s+([A-Za-z_]\w*)/i)?.[1] || "Main"}`
-    : `main.${language}`;
-
-  const filePath = path.join(tempDir, fileName);
-  const container = `sandbox_${socket.id}`;
-
   await fs.mkdir(tempDir, { recursive: true });
+
+  const filePath = path.join(tempDir, lang.file);
   await fs.writeFile(filePath, code);
 
-  const limits = {
-    memory: "256m",
-    cpu: "0.5",
-    timeout: 30000,
-  };
+  // Build sandboxed shell command
+  const commands: string[] = [];
 
-  const dockerCmd = [
-    "docker",
-    "run",
-    "--rm",
-    "--name",
-    container,
-    "--cpus", limits.cpu,
-    "--memory", limits.memory,
-    "--network", "none",
-    "-i",
-    "-v", `${tempDir}:/app`,
-    "-w", "/app",
-    lang.dockerImage,
-    "sh",
-    "-c",
-    lang.execCmd(fileName),
-  ];
+  if (lang.compile) commands.push(lang.compile(lang.file));
+  commands.push(lang.run(lang.file));
 
-  // Spawn process
-  const proc: ChildProcessWithoutNullStreams = spawn(dockerCmd[0], dockerCmd.slice(1));
+  const sandboxCmd = `
+    ulimit -t 2
+    ulimit -v 262144
+    ${commands.join(" && ")}
+  `;
+
+  const proc = spawn("sh", ["-c", sandboxCmd], {
+    cwd: tempDir,
+  });
+
   activeProcesses.set(socket.id, proc);
 
-  // Timeout kill
   const killTimer = setTimeout(() => {
     proc.kill("SIGKILL");
-    socket.emit("output", "\n⚠️ Execution timed out (30s limit)\n");
-  }, limits.timeout);
+    socket.emit("output", "\n⚠️ Time limit exceeded\n");
+  }, 30000);
 
-  // Streaming stdout/stderr
-  proc.stdout.on("data", (data) => socket.emit("output", data.toString()));
-  proc.stderr.on("data", (data) => socket.emit("output", data.toString()));
+  proc.stdout.on("data", (d) => socket.emit("output", d.toString()));
+  proc.stderr.on("data", (d) => socket.emit("output", d.toString()));
 
-  // Close
   proc.on("close", async (code) => {
     clearTimeout(killTimer);
     socket.emit("done", `Exited with code ${code}`);
     await fs.rm(tempDir, { recursive: true, force: true });
     activeProcesses.delete(socket.id);
   });
-
-  // Initial stdin
-
 }
 
-// Function to send live stdin
+const activeProcesses = new Map<string, ChildProcessWithoutNullStreams>();
+
 export function sendStdin(socket: Socket, data: string) {
   const proc = activeProcesses.get(socket.id);
   if (proc && !proc.killed && proc.stdin.writable) {
     proc.stdin.write(data + "\n");
-  } else {
-    socket.emit("output", "⚠️ No active process to send input to.\n");
   }
 }
 
-// Cleanup on disconnect
 export function cleanupProcess(socketId: string) {
   const proc = activeProcesses.get(socketId);
   if (proc) proc.kill("SIGKILL");

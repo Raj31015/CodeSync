@@ -10,4 +10,7 @@ io.on("connection", socket => {
   import("./sockets/codeRunner").then(({ handleCodeRun }) => handleCodeRun(socket));
 });
 
-server.listen(4000, () => console.log("Socket server running on 4000"));
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => {
+  console.log(`Socket server running on ${PORT}`);
+});
