@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y \
     golang \
     && rm -rf /var/lib/apt/lists/*
 
-# Set workdir
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install Node deps
-RUN npm install --omit=dev
+# Install Node deps + TypeScript compiler
+RUN npm install --omit=dev \
+    && npm install -g typescript
 
 # Copy rest of the code
 COPY . .
@@ -23,7 +23,7 @@ COPY . .
 # Build server
 RUN npm run build:server
 
-# Expose port (Render sets PORT)
+# Expose port (Render injects PORT)
 EXPOSE 4000
 
 # Start server
