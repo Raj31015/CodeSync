@@ -52,7 +52,7 @@ export function CollaborativeEditor({ file }: Props) {
 
   const userInfo = useSelf((me) => me.info);
   useEffect(() => {
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!,{transports:["websockets"]}); // your Next+Socket.IO server
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!,{transports:["websocket"]}); // your Next+Socket.IO server
   socketRef.current=socket
   socketRef.current.on("connect", () => {
     console.log("🟢 Connected to server:", socket.id);
@@ -81,11 +81,22 @@ export function CollaborativeEditor({ file }: Props) {
   });
   socketRef.current.on("output", (data: string) => {
   setOutput((prev) => prev + data);
-  setIsRunning(false);
+  
 });
   socketRef.current.on("disconnect", () => {
     console.log("🔴 Disconnected from server");
   });
+  socketRef.current.on("execution_done", () => {
+  setIsRunning(false);
+});
+  socketRef.current.on("execution_start", () => {
+  setIsRunning(true);
+  setShowOutput(true);
+  setOutput("");
+});
+socketRef.current.onAny((event, ...args) => {
+  console.log("📡 socket event:", event, args);
+});
 
   return () => {
     socketRef.current?.disconnect();

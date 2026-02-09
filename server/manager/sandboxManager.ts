@@ -23,18 +23,27 @@ export async function runCodeSandboxed(
   const commands: string[] = [];
 
   if (lang.compile) commands.push(lang.compile(lang.file));
+if (language === "js" || language === "javascript") {
+  commands.push(`node --max-old-space-size=256 ${(lang.file)}`);
+} else {
   commands.push(lang.run(lang.file));
+}
 
-  const sandboxCmd = `
-    ulimit -t 2
-    ulimit -v 262144
+  const sandboxCmd = `      
     ${commands.join(" && ")}
   `;
+  const shell = process.platform === "win32" ? "cmd" : "sh";
+const args =
+  process.platform === "win32"
+    ? ["/c", commands.join(" && ")]
+    : ["-c", sandboxCmd];
+console.log("==== SANDBOX CMD START ====");
+console.log(sandboxCmd);
+console.log("==== SANDBOX CMD END ====");
 
-  const proc = spawn("sh", ["-c", sandboxCmd], {
-    cwd: tempDir,
-  });
+const proc = spawn(shell, args, { cwd: tempDir });
 
+ 
   activeProcesses.set(socket.id, proc);
 
   const killTimer = setTimeout(() => {
@@ -47,7 +56,7 @@ export async function runCodeSandboxed(
 
   proc.on("close", async (code) => {
     clearTimeout(killTimer);
-    socket.emit("done", `Exited with code ${code}`);
+    socket.emit("execution_done", `Exited with code ${code}`);
     await fs.rm(tempDir, { recursive: true, force: true });
     activeProcesses.delete(socket.id);
   });

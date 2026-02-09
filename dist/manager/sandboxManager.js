@@ -22,15 +22,23 @@ async function runCodeSandboxed(socket, { language, code }) {
     const commands = [];
     if (lang.compile)
         commands.push(lang.compile(lang.file));
-    commands.push(lang.run(lang.file));
-    const sandboxCmd = `
-    ulimit -t 2
-    ulimit -v 262144
+    if (language === "js" || language === "javascript") {
+        commands.push(`node --max-old-space-size=256 ${(lang.file)}`);
+    }
+    else {
+        commands.push(lang.run(lang.file));
+    }
+    const sandboxCmd = `      
     ${commands.join(" && ")}
   `;
-    const proc = (0, child_process_1.spawn)("sh", ["-c", sandboxCmd], {
-        cwd: tempDir,
-    });
+    const shell = process.platform === "win32" ? "cmd" : "sh";
+    const args = process.platform === "win32"
+        ? ["/c", commands.join(" && ")]
+        : ["-c", sandboxCmd];
+    console.log("==== SANDBOX CMD START ====");
+    console.log(sandboxCmd);
+    console.log("==== SANDBOX CMD END ====");
+    const proc = (0, child_process_1.spawn)(shell, args, { cwd: tempDir });
     activeProcesses.set(socket.id, proc);
     const killTimer = setTimeout(() => {
         proc.kill("SIGKILL");
@@ -40,7 +48,7 @@ async function runCodeSandboxed(socket, { language, code }) {
     proc.stderr.on("data", (d) => socket.emit("output", d.toString()));
     proc.on("close", async (code) => {
         clearTimeout(killTimer);
-        socket.emit("done", `Exited with code ${code}`);
+        socket.emit("execution_done", `Exited with code ${code}`);
         await promises_1.default.rm(tempDir, { recursive: true, force: true });
         activeProcesses.delete(socket.id);
     });

@@ -5,6 +5,7 @@ const sandboxManager_1 = require("../manager/sandboxManager");
 function handleCodeRun(socket) {
     socket.on("run_code", async ({ language, code }) => {
         try {
+            socket.emit("execution_start");
             await (0, sandboxManager_1.runCodeSandboxed)(socket, { language, code });
         }
         catch (err) {

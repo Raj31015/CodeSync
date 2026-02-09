@@ -36,16 +36,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// server/index.ts (dev)
-const socket_io_1 = require("socket.io");
+// server/index.ts
 const http_1 = __importDefault(require("http"));
-const server = http_1.default.createServer(); // no Next.js here
-const io = new socket_io_1.Server(server, { cors: { origin: "*" } });
+const socket_io_1 = require("socket.io");
+const server = http_1.default.createServer((req, res) => {
+    // 👇 THIS is what Render needs
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("OK");
+});
+const io = new socket_io_1.Server(server, {
+    cors: { origin: "*" },
+});
 io.on("connection", socket => {
     console.log("Client connected:", socket.id);
     Promise.resolve().then(() => __importStar(require("./sockets/codeRunner"))).then(({ handleCodeRun }) => handleCodeRun(socket));
 });
-const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-    console.log(`Socket server running on ${PORT}`);
+const PORT = Number(process.env.PORT) || 4000;
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`HTTP + Socket server running on ${PORT}`);
 });

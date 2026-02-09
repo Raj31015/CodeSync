@@ -6,8 +6,11 @@ import {
 } from "../manager/sandboxManager";
 
 export function handleCodeRun(socket: Socket) {
+ 
+
   socket.on("run_code", async ({ language, code }) => {
     try {
+       socket.emit("execution_start");
       await runCodeSandboxed(socket, { language, code });
     } catch (err: any) {
       socket.emit("output", `❌ ${err.message}\n`);
