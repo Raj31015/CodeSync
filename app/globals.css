@@ -22,6 +22,9 @@ body{
     --sidebar-accent-foreground:240 5.9% 10%;
     --sidebar-border:220 13% 91%;
     --sidebar-ring:217.2 91.2% 59.8%; 
+    --background: 240 10% 4%;
+    --foreground: 0 0% 100%;
+    --border: 240 5% 26%;
   }
   .dark {
     --sidebar-background:240 5.9% 10%;
@@ -32,14 +35,18 @@ body{
     --sidebar-accent-foreground:240 4.8% 95.9%;
     --sidebar-border:240 3.7% 15.9%;
     --sidebar-ring:217.2 91.2% 59.8%; 
+    --background: 240 10% 4%;
+    --foreground: 0 0% 100%;
+    --border: 240 5% 26%;
+
   } 
 }
 @layer base {
   * {
-    @apply border-border; 
+    @apply border-gray-700; 
   }
   body {
-    @apply bg-background text-foreground; 
+    @apply bg-black text-white; 
   } 
 }
 /* styles/globals.css or component styles */
