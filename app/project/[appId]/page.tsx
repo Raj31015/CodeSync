@@ -38,7 +38,7 @@ const Home = () => {
   if (!selectedFileId && !latestFile) {
     return (
       <div>
-        <header className="border-b-[1px] p-4 border-none w-full flex">
+        <header className="border-b p-4 border-none w-full flex">
           <div className="flex items-center">
             <HomeIcon
               className="text-xs text-gray-300/40 cursor-pointer hover:text-white"
@@ -66,7 +66,7 @@ const Home = () => {
   if (isLoading || !fileToLoad || !file) {
     return (
       <div className="flex flex-col">
-      <header className="border-b-[1px] p-4 border-none w-full flex">
+      <header className="border-b p-4 border-none w-full flex">
           <div className="flex items-center">
             <HomeIcon
               className="text-xs text-gray-300/40 cursor-pointer hover:text-white"
@@ -93,7 +93,7 @@ const Home = () => {
 
   return (
     <div className="flex flex-col">
-       <header className="border-b-[1px] p-4 border-none w-full flex">
+       <header className="border-b p-4 border-none w-full flex">
           <div className="flex items-center">
             <HomeIcon
               className="text-xs text-gray-300/40 cursor-pointer hover:text-white"
