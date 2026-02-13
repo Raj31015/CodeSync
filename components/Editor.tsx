@@ -107,7 +107,7 @@ socketRef.current.onAny((event, ...args) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (userInput.trim() !== "") {
-        socketRef.current?.emit("stdin",userInput+"\n")
+        socketRef.current?.emit("stdin",userInput)
         setStdinLines((prev) => [...prev, userInput]);
         
         setUserInput("");

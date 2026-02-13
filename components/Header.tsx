@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { UserButton } from '@clerk/nextjs';
 import { Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNotifications } from '@/features/notifications/api/useNotifications';
 
 interface User {
   id: string;
@@ -46,12 +47,7 @@ export default function Header() {
   const [loading, setLoading] = useState(false);
 
   const [openNotif, setOpenNotif] = useState(false);
-
-  // Dummy notifications
-  const notifications = [
-    { id: 1, message: 'Riya invited you to Project Alpha', time: '2m ago' },
-    { id: 2, message: 'Your request to join Project Beta was accepted', time: '1h ago' },
-  ];
+  const notificationsQuery = useNotifications(4);
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
@@ -78,6 +74,8 @@ export default function Header() {
 
     fetchUsers();
   }, [debouncedQuery]);
+
+  const notifications = notificationsQuery.data ?? [];
 
   return (
     <header className="w-full px-6 py-4 border-b border-gray-300/40 flex flex-row justify-between items-center relative">
@@ -167,7 +165,9 @@ export default function Header() {
                           className="p-2 rounded-md hover:bg-muted/50 text-sm cursor-pointer transition"
                         >
                           <p>{n.message}</p>
-                          <span className="text-xs text-muted-foreground">{n.time}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(n.createdAt).toLocaleString()}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -188,3 +188,4 @@ export default function Header() {
     </header>
   );
 }
+

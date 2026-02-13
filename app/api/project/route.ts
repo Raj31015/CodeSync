@@ -85,6 +85,7 @@ export async function POST(req:Request){
     appId:appId,
     userId:userId,
     name:name,
+    createdAt:new Date(),
     updatedAt:new Date(),
     updatedBy:user.username
 

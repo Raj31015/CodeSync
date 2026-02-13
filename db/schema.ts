@@ -67,6 +67,8 @@ export const invitations = pgTable("invitations", {
   fromUserId: text("from_user_id").notNull(),
   toUserId: text("to_user_id").notNull(),
   projectId: text("project_id").notNull().references(() => apps.appId),
+  // role offered to the invited user for this project
+  role: roleEnum("role").notNull().default("viewer"),
   status: invitationStatusEnum("status").default("pending"),
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow(),
