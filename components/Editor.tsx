@@ -12,7 +12,7 @@ import { Toolbar } from "@/components/Toolbar";
 import { extensionToLanguage } from "@/lib/languageExtensions";
 import type { LanguageSupport } from "@codemirror/language";
 import { useGetFile } from "@/features/files/api/useGetFile";
-
+import {useMemo} from "react"
 import type { File } from "@/app/api/files/route";
 import { ResizablePanel, ResizablePanelGroup } from "./ui/resizable";
 import { Textarea } from "./ui/textarea";
@@ -22,8 +22,8 @@ type Props = {
 };
 export function CollaborativeEditor({ file }: Props) {
   const room = useRoom();
-  const res = useGetFile(file.fileId);
-  const provider = getYjsProviderForRoom(room);
+  
+  const provider = useMemo(()=>{return getYjsProviderForRoom(room)},[room]);
   const [element, setElement] = useState<HTMLElement>();
   const [yUndoManager, setYUndoManager] = useState<Y.UndoManager>();
   const [ytext, setYText] = useState<Y.Text | null>(null);
@@ -122,52 +122,46 @@ socketRef.current.onAny((event, ...args) => {
     setElement(node);
   }, []);
 
-  useEffect(() => {
-    if (!element || !room || !userInfo || !file) return;
+useEffect(() => {
+  if (!element || !userInfo || !file) return;
 
-    provider.connect();
-    const ydoc = provider.getYDoc();
-    const ytext = ydoc.getText("content");
-    setYText(ytext);
+  const ydoc = provider.getYDoc();
+  const ytext = ydoc.getText("content");
 
-    const undoManager = new Y.UndoManager(ytext);
-    setYUndoManager(undoManager);
+  const undoManager = new Y.UndoManager(ytext);
 
-    const isFresh = ytext.toString().trim().length === 0;
-    const isDBContentAvailable = !!res.data.content;
+  const isFresh = ytext.toString().trim().length === 0;
+  const isDBContentAvailable = !!file.content;
 
-    if (isFresh && isDBContentAvailable) {
-      ytext.delete(0, ytext.length);
-      ytext.insert(0, res.data.content);
-    }
+  if (isFresh && isDBContentAvailable && file.content) {
+    ytext.delete(0, ytext.length);
+    ytext.insert(0, file.content);
+  }
 
-    provider.awareness.setLocalStateField("user", {
-      name: userInfo.name,
-      color: userInfo.color,
-      colorLight: userInfo.color + "80",
-    });
+  provider.awareness.setLocalStateField("user", {
+    name: userInfo.name,
+    color: userInfo.color,
+    colorLight: userInfo.color + "80",
+  });
 
-    const state = EditorState.create({
-      doc: ytext.toString(),
-      extensions: [
-        basicSetup,
-        langFunc as LanguageSupport,
-        yCollab(ytext, provider.awareness, { undoManager }),
-      ],
-    });
+  const state = EditorState.create({
+    doc: ytext.toString(),
+    extensions: [
+      basicSetup,
+      langFunc as LanguageSupport,
+      yCollab(ytext, provider.awareness, { undoManager }),
+    ],
+  });
 
-    const view = new EditorView({
-      state,
-      parent: element,
-    });
+  const view = new EditorView({
+    state,
+    parent: element,
+  });
 
-
-    
-
-    return () => {
-      view.destroy();
-    };
-  }, [element, room, userInfo, res.data,file]);
+  return () => {
+    view.destroy();
+  };
+}, [element, userInfo, file.fileId]);
 
   const handleRunCode = () => {
     if (!ytext) return;
@@ -211,27 +205,17 @@ socketRef.current.onAny((event, ...args) => {
       </div>
 
       <ResizablePanelGroup direction="vertical">
-        <ResizablePanel>
-          <div className="relative h-full" ref={ref}></div>
+        {/* Code editor area - scrollable */}
+        <ResizablePanel defaultSize={60}>
+          <div className="relative h-full overflow-auto" ref={ref}></div>
         </ResizablePanel>
 
-        {/* Stdin Input */}
-        <ResizablePanel>
-          <Textarea
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type stdin here. Press Enter for new line."
-            className="bg-[#2E2E3E] text-white font-mono"
-          />
-        </ResizablePanel>
-
-  
-        <ResizablePanel className="border-t border-gray-500 p-2">
-          <h1 className="font-semibold text-white">Output</h1>
+        {/* Output */}
+        <ResizablePanel defaultSize={25} className="border-t border-gray-500 p-2">
+          <h1 className="font-semibold text-white mb-1">Output</h1>
           <div
             ref={outputRef}
-            className="h-40 overflow-auto bg-black p-2 text-white font-mono"
+            className="h-40 overflow-auto bg-black p-2 text-white font-mono rounded"
           >
             {showOutput ? (
               isRunning ? (
@@ -239,7 +223,7 @@ socketRef.current.onAny((event, ...args) => {
               ) : (
                 <pre>
                   {lastStdin && (
-                    <div className="text-gray-400">
+                    <div className="text-gray-400 mb-2">
                       <strong>stdin:</strong>
                       <br />
                       {lastStdin}
@@ -252,6 +236,20 @@ socketRef.current.onAny((event, ...args) => {
             ) : (
               <div className="text-gray-500 italic">Run the code to see output</div>
             )}
+          </div>
+        </ResizablePanel>
+
+        {/* Stdin Input at the bottom */}
+        <ResizablePanel defaultSize={15}>
+          <div className="border-t border-gray-700 p-2">
+            <p className="text-xs text-gray-400 mb-1">Program input (stdin)</p>
+            <Textarea
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type input here and press Enter to send."
+              className="bg-[#2E2E3E] text-white font-mono resize-none h-20"
+            />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>

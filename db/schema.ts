@@ -84,6 +84,8 @@ export const joinRequests = pgTable("join_requests", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(), 
   projectId: text("project_id").notNull().references(() => apps.appId),
+  // requested role for this project (used when accepted)
+  role: roleEnum("role").notNull().default("viewer"),
   status: requestStatusEnum("status").default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });

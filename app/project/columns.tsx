@@ -133,6 +133,8 @@ export const columns:ColumnDef<App>[] = [
       const [requestOpen, setRequestOpen] = useState(false);
       const [toUserId, setToUserId] = useState("");
       const [inviteMessage, setInviteMessage] = useState("");
+      const [inviteRole, setInviteRole] = useState<"viewer" | "editor" | "owner">("viewer");
+      const [requestRole, setRequestRole] = useState<"viewer" | "editor" | "owner">("viewer");
 
       const createInvitation = useCreateInvitation();
       const createJoinRequest = useCreateJoinRequest();
@@ -144,6 +146,7 @@ export const columns:ColumnDef<App>[] = [
             toUserId,
             projectId: app.appId,
             message: inviteMessage || undefined,
+            role: inviteRole,
           },
           {
             onSuccess: () => {
@@ -157,7 +160,7 @@ export const columns:ColumnDef<App>[] = [
 
       const handleSendJoinRequest = () => {
         createJoinRequest.mutate(
-          { projectId: app.appId },
+          { projectId: app.appId, role: requestRole },
           {
             onSuccess: () => {
               setRequestOpen(false);
@@ -198,7 +201,7 @@ export const columns:ColumnDef<App>[] = [
           </DropdownMenu>
 
           <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-            <DialogContent>
+            <DialogContent className="bg-[#2b2e3b] text-white border border-gray-600">
               <DialogHeader>
                 <DialogTitle>Invite user to app</DialogTitle>
                 <DialogDescription>
@@ -216,6 +219,20 @@ export const columns:ColumnDef<App>[] = [
                   value={inviteMessage}
                   onChange={(e) => setInviteMessage(e.target.value)}
                 />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Role</span>
+                  <select
+                    className="border bg-background text-xs rounded px-2 py-1"
+                    value={inviteRole}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setInviteRole(e.target.value as "viewer" | "editor" | "owner")
+                    }
+                  >
+                    <option value="viewer">Viewer</option>
+                    <option value="editor">Editor</option>
+                    <option value="owner">Owner</option>
+                  </select>
+                </div>
               </div>
               <DialogFooter>
                 <Button
@@ -235,13 +252,29 @@ export const columns:ColumnDef<App>[] = [
           </Dialog>
 
           <Dialog open={requestOpen} onOpenChange={setRequestOpen}>
-            <DialogContent>
+            <DialogContent className="bg-[#2b2e3b] text-white border border-gray-600">
               <DialogHeader>
                 <DialogTitle>Request access</DialogTitle>
                 <DialogDescription>
                   Send a request to join “{app.name}”. The owner will see it in their Inbox.
                 </DialogDescription>
               </DialogHeader>
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Requested role</span>
+                  <select
+                    className="border bg-background text-xs rounded px-2 py-1"
+                    value={requestRole}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setRequestRole(e.target.value as "viewer" | "editor" | "owner")
+                    }
+                  >
+                    <option value="viewer">Viewer</option>
+                    <option value="editor">Editor</option>
+                    <option value="owner">Owner</option>
+                  </select>
+                </div>
+              </div>
               <DialogFooter>
                 <Button
                   variant="outline"

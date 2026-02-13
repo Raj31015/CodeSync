@@ -19,6 +19,8 @@ import { UserButton } from '@clerk/nextjs';
 import { Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '@/features/notifications/api/useNotifications';
+import { useGetApps } from '@/features/apps/api/useGetApps';
+import { useCreateInvitation } from '@/features/invitations/api/useCreateInvitation';
 
 interface User {
   id: string;
@@ -48,6 +50,10 @@ export default function Header() {
 
   const [openNotif, setOpenNotif] = useState(false);
   const notificationsQuery = useNotifications(4);
+  const appsQuery = useGetApps();
+  const createInvitation = useCreateInvitation();
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [inviteRole, setInviteRole] = useState<"viewer" | "editor" | "owner">("viewer");
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
@@ -76,6 +82,7 @@ export default function Header() {
   }, [debouncedQuery]);
 
   const notifications = notificationsQuery.data ?? [];
+  const apps = appsQuery.data ?? [];
 
   return (
     <header className="w-full px-6 py-4 border-b border-gray-300/40 flex flex-row justify-between items-center relative">
@@ -109,17 +116,61 @@ export default function Header() {
           </form>
         </Form>
 
-        {/* Search results */}
+        {/* Search results with invite controls */}
         {users.length > 0 && (
-          <ul className="absolute top-full mt-2 w-64 bg-background border border-gray-200 rounded-md shadow-md max-h-60 overflow-auto z-40">
+          <ul className="absolute top-full mt-2 w-80 bg-background border border-gray-200 rounded-md shadow-md max-h-72 overflow-auto z-40">
             {users.map((user) => (
               <li
                 key={user.id}
-                className="px-4 py-2 hover:bg-muted cursor-pointer transition"
+                className="px-4 py-2 hover:bg-muted cursor-pointer transition flex flex-col gap-1"
               >
                 <p className="font-medium">
                   {user.username || `${user.firstName ?? ''} ${user.lastName ?? ''}`}
                 </p>
+                {apps.length > 0 && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Invite to</span>
+                    <select
+                      className="border bg-background rounded px-2 py-1 text-xs"
+                      value={selectedAppId ?? apps[0].appId}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setSelectedAppId(e.target.value)
+                      }
+                    >
+                      {apps.map((app) => (
+                        <option key={app.appId} value={app.appId}>
+                          {app.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className="border bg-background rounded px-2 py-1 text-xs"
+                      value={inviteRole}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setInviteRole(e.target.value as "viewer" | "editor" | "owner")
+                      }
+                    >
+                      <option value="viewer">Viewer</option>
+                      <option value="editor">Editor</option>
+                      <option value="owner">Owner</option>
+                    </select>
+                    <Button
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      disabled={createInvitation.isPending}
+                      onClick={async () => {
+                        const appId = selectedAppId ?? apps[0].appId;
+                        createInvitation.mutate({
+                          toUserId: user.id,
+                          projectId: appId,
+                          role: inviteRole,
+                        });
+                      }}
+                    >
+                      Invite
+                    </Button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -131,7 +182,21 @@ export default function Header() {
         {/* 🔔 Notification Bell */}
         <div className="relative">
           <button
-            onClick={() => setOpenNotif(!openNotif)}
+            onClick={async () => {
+              const next = !openNotif;
+              setOpenNotif(next);
+              if (!next || !notifications.length) return;
+              try {
+                await fetch("/api/notifications", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ ids: notifications.map((n) => n.id) }),
+                });
+                notificationsQuery.refetch();
+              } catch {
+                // ignore
+              }
+            }}
             className="relative p-2 hover:bg-muted rounded-full transition"
           >
             <Bell className="w-5 h-5" />

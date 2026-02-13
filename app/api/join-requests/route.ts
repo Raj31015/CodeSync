@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { projectId } = body ?? {};
+  const { projectId, role } = body ?? {};
 
   if (!projectId) {
     return new Response(JSON.stringify({ error: "Invalid input" }), {
@@ -49,6 +49,7 @@ export async function POST(req: Request) {
     id,
     userId,
     projectId,
+    role: (role ?? "viewer"),
     status: "pending",
   });
 
@@ -116,7 +117,7 @@ export async function PATCH(req: Request) {
     .where(eq(joinRequests.id, requestId));
 
   if (newStatus === "accepted") {
-    // Add as collaborator with viewer role by default
+    // Add as collaborator with requested role by default
     const existingCollab = await db
       .select()
       .from(collaborators)
@@ -132,7 +133,7 @@ export async function PATCH(req: Request) {
         collabId: createId(),
         userId: request.userId,
         app_id: request.projectId,
-        role: "viewer",
+        role: request.role,
       });
     }
   }

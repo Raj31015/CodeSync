@@ -77,7 +77,12 @@ export async function GET() {
     })
     .from(invitations)
     .leftJoin(apps, eq(apps.appId, invitations.projectId))
-    .where(eq(invitations.toUserId, userId))
+    .where(
+      and(
+        eq(invitations.toUserId, userId),
+        eq(invitations.status, "pending") // only pending invites in inbox
+      )
+    )
     .orderBy(desc(invitations.createdAt));
 
   const fromUserIds = Array.from(
@@ -132,7 +137,12 @@ export async function GET() {
       })
       .from(joinRequests)
       .leftJoin(apps, eq(apps.appId, joinRequests.projectId))
-      .where(inArray(joinRequests.projectId, ownedAppIds))
+      .where(
+        and(
+          inArray(joinRequests.projectId, ownedAppIds),
+          eq(joinRequests.status, "pending") // only pending incoming requests
+        )
+      )
       .orderBy(desc(joinRequests.createdAt));
 
     const requesterIds = Array.from(
@@ -175,7 +185,12 @@ export async function GET() {
     })
     .from(joinRequests)
     .leftJoin(apps, eq(apps.appId, joinRequests.projectId))
-    .where(eq(joinRequests.userId, userId))
+    .where(
+      and(
+        eq(joinRequests.userId, userId),
+        eq(joinRequests.status, "pending") // only pending outgoing requests
+      )
+    )
     .orderBy(desc(joinRequests.createdAt));
 
   const requestsSent: InboxRequest[] = rawSent.map((r) => ({

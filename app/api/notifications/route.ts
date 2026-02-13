@@ -34,7 +34,12 @@ export async function GET(req: Request) {
       createdAt: notifications.createdAt,
     })
     .from(notifications)
-    .where(eq(notifications.userId, userId))
+    .where(
+      and(
+        eq(notifications.userId, userId),
+        eq(notifications.read, false) // only unread
+      )
+    )
     .orderBy(desc(notifications.createdAt))
     .limit(limit);
 

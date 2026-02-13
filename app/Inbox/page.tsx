@@ -21,10 +21,15 @@ export default function InvitesPage() {
   const updateJoinRequest = useUpdateJoinRequest();
   const createJoinRequest = useCreateJoinRequest();
   const [projectId, setProjectId] = useState("");
+  const [requestRole, setRequestRole] = useState<"viewer" | "editor" | "owner">("viewer");
 
   const renderList = () => {
     if (isLoading || !data) {
-      return <p className="text-sm text-muted-foreground">Loading...</p>;
+      return (
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Loading inbox...
+        </p>
+      );
     }
 
     switch (filter) {
@@ -219,20 +224,38 @@ export default function InvitesPage() {
           </div>
           <Separator className="my-4 bg-gray-400 " />
 
-          <div className="flex flex-col items-center justify-center space-y-3 max-w-screen-xl">
+          <div className="flex flex-col items-center justify-center space-y-3 max-w-7xl">
             {filter === "requests" && (
-              <div className="w-[80%] flex items-center gap-2 mb-4">
+              <div className="w-[80%] flex flex-wrap items-center gap-2 mb-4">
                 <Input
                   placeholder="Enter project ID to request access"
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
                   className="text-sm"
                 />
+                <select
+                  className="border bg-background text-sm rounded px-2 py-1"
+                  value={requestRole}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setRequestRole(e.target.value as "viewer" | "editor" | "owner")
+                  }
+                >
+                  <option value="viewer">Viewer</option>
+                  <option value="editor">Editor</option>
+                  <option value="owner">Owner</option>
+                </select>
                 <Button
                   size="sm"
                   disabled={!projectId || createJoinRequest.isPending}
                   onClick={() =>
-                    createJoinRequest.mutate({ projectId }, { onSuccess: () => setProjectId("") })
+                    createJoinRequest.mutate(
+                      { projectId, role: requestRole },
+                      {
+                        onSuccess: () => {
+                          setProjectId("");
+                        },
+                      }
+                    )
                   }
                 >
                   Send request
