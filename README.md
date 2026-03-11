@@ -1,92 +1,87 @@
-CodeSync – Real-Time Collaborative Code Editor
+# CodeSync – Real-Time Collaborative Code Editor
 
-A real-time collaborative code editor that allows multiple users to write and execute code together in the same workspace. Userswith assinged roles(editor,viewer,owner) can create coding apps, invite collaborators, and edit files simultaneously with instant synchronization.Every coding environment is sanboxed and secure.
+CodeSync is a real-time collaborative coding platform that allows multiple users to write and execute code together in the same workspace.
 
-🔗 Live Demo: https://code-sync-bice.vercel.app
+Users with assigned roles (**owner, editor, viewer**) can create coding apps, invite collaborators, and edit files simultaneously with instant synchronization. Each coding environment runs inside a secure sandbox to safely execute user code.
 
-Demo
+🔗 **Live Demo:** https://code-sync-bice.vercel.app
 
+
+---
+
+## Demo
 
 https://github.com/user-attachments/assets/c522f29b-e0e5-4337-8015-825b68b3bcf0
-<img width="1920" height="1036" alt="Screenshot (332)" src="https://github.com/user-attachments/assets/2c98b551-9c6e-4b24-8c8c-d4c6260ed6b3" />
-<img width="1920" height="1034" alt="Screenshot (331)" src="https://github.com/user-attachments/assets/a0b850ac-d3d1-42b2-be3b-8198db84ee36" />
-<img width="1920" height="1037" alt="Screenshot (330)" src="https://github.com/user-attachments/assets/8171f728-3729-4ea0-adcd-34805cc5d9d9" />
-<img width="1920" height="1033" alt="Screenshot (329)" src="https://github.com/user-attachments/assets/aa8607d8-24ab-4950-998a-485c66d768cf" />
+
+<img width="1920" height="1036" alt="Dashboard" src="https://github.com/user-attachments/assets/2c98b551-9c6e-4b24-8c8c-d4c6260ed6b3" />
+
+<img width="1920" height="1034" alt="Invite Collaborators" src="https://github.com/user-attachments/assets/a0b850ac-d3d1-42b2-be3b-8198db84ee36" />
+
+<img width="1920" height="1037" alt="Collaborative Editor" src="https://github.com/user-attachments/assets/8171f728-3729-4ea0-adcd-34805cc5d9d9" />
+
+<img width="1920" height="1033" alt="Run Code Output" src="https://github.com/user-attachments/assets/aa8607d8-24ab-4950-998a-485c66d768cf" />
 
 
-Key Features
-Real-Time Collaboration
+---
 
-Multiple users can edit the same code file simultaneously with instant updates across all connected clients.
+## Key Features
 
-User Invitations
+### Real-Time Collaboration
+Multiple users can edit the same code file simultaneously with instant synchronization across connected clients.
 
-Invite collaborators to specific apps with role-based access.
+### Role-Based Access
+Each workspace supports **owner, editor, and viewer** roles for controlled collaboration.
 
-Shared Code Editor
+### User Invitations
+Invite collaborators to specific apps and manage access permissions.
 
-Collaborators can edit code together in a synchronized editor environment.
+### Shared Code Editor
+Collaborators work together in a synchronized editor powered by CodeMirror.
 
-Code Execution
+### Code Execution
+Run code directly inside the editor with support for user input and view results in the integrated output console.
 
-Run code directly inside the editor with user input and view output in the integrated console.
+### Multilanguage Support
+Programming language is inferred automatically from the file extension.
 
-Multilanguage Support
+### App-Based Workspaces
+Create multiple coding environments and manage files within each project.
 
-Users can code in multiple languages inferred by the file extension.
+### Collaborator Management
+View all collaborators, their roles, and associated apps from a dedicated management panel.
 
-App-Based Workspaces
 
-Users can create multiple coding apps and manage files inside each workspace.
+---
 
-Collaborator Management
+## Tech Stack
 
-View collaborators, roles, and app ownership through a dedicated management panel.
+### Frontend
+- Next.js
+- React
+- TailwindCSS
+- CodeMirror
+- Shadcn UI
 
-Tech Stack
-Frontend
+### Backend
+- Node.js
+- WebSockets (real-time sync)
+- Supabase
+- PostgreSQL
 
-Next.js
+### Infrastructure
+- Vercel (frontend deployment)
+- Render (backend deployment)
+- Liveblocks (real-time collaboration)
+- Docker (sandboxed code execution)
 
-React
 
-TailwindCSS
+---
 
-Codemirror (Editor)
+## How It Works
 
-Shadcn
-
-Backend
-
-Node.js
-
-WebSockets / Real-time sync
-
-Supabase
-
-PostgreSQL
-
-Infrastructure
-
-Vercel deployment
-
-Liveblocks (for real-time collaboration)
-
-Docker (for sandboxed environment)
-
-render (for backend deployment)
-
-⚙️ How It Works
-
-1.A user creates a new coding app.
-
-2.The owner invites collaborators to the app.
-
-3.Invited users accept the invitation.
-
-4.Multiple users open the same workspace.
-
-5.All code changes are synchronized instantly using real-time collaboration.
-
-6.Users can run the code and see shared output.
-
+1. A user creates a new coding app.
+2. The app owner invites collaborators.
+3. Invited users accept the invitation.
+4. Multiple users open the same workspace.
+5. Code changes sync instantly across all clients.
+6. Users can run the code and view shared output.
