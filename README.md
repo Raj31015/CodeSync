@@ -1,7 +1,7 @@
 # CodeSync – Real-Time Collaborative Code Editor
+Real-time collaborative coding platform inspired by tools like Replit and CodeSandbox.
 
 CodeSync is a real-time collaborative coding platform that allows multiple users to write and execute code together in the same workspace.
-
 Users with assigned roles (**owner, editor, viewer**) can create coding apps, invite collaborators, and edit files simultaneously with instant synchronization. Each coding environment runs inside a secure sandbox to safely execute user code.
 
 🔗 **Live Demo:** https://code-sync-bice.vercel.app
@@ -74,6 +74,13 @@ View all collaborators, their roles, and associated apps from a dedicated manage
 - Liveblocks (real-time collaboration)
 - Docker (sandboxed code execution)
 
+
+---
+##Architecture
+
+The system uses WebSockets for real-time synchronization between clients.
+Liveblocks manages collaborative presence and shared state while the backend
+handles app management, invitations, and code execution inside Docker sandboxes.
 
 ---
 
