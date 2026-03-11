@@ -85,3 +85,14 @@ View all collaborators, their roles, and associated apps from a dedicated manage
 4. Multiple users open the same workspace.
 5. Code changes sync instantly across all clients.
 6. Users can run the code and view shared output.
+
+
+---
+
+##  Installation & Setup
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/Raj31015/CodeSync.git
+cd CodeSync
