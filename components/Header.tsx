@@ -85,15 +85,15 @@ export default function Header() {
   const apps = appsQuery.data ?? [];
 
   return (
-    <header className="w-full px-6 py-4 border-b border-gray-300/40 flex flex-row justify-between items-center relative">
+    <header className="w-full px-6 py-4 border-b border-gray-300/40 flex items-center gap-4">
       {/* Left section: logo */}
-      <div className='flex items-center gap-2 px-4'>
+      <div className='flex items-center gap-2 shrink-0'>
         <Image src="logo2.svg" alt='logo' height={40} width={40}/>
         <h1 className="text-lg font-semibold">Codesync</h1>
       </div>
 
       {/* Middle: search */}
-      <div className="relative flex items-center max-w-xl w-full">
+      <div className="relative flex-1 items-center max-w-xl min-w-0">
         <Form {...form}>
           <form className="w-full">
             <FormField
@@ -178,7 +178,7 @@ export default function Header() {
       </div>
 
       {/* Right: Notifications + User */}
-      <div className="flex items-center gap-4 relative ml-6 bg-inherit">
+      <div className="flex items-center gap-4 relative ml-auto bg-inherit">
         {/* 🔔 Notification Bell */}
         <div className="relative">
           <button
