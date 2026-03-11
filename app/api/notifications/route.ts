@@ -11,7 +11,7 @@ export interface NotificationItem {
   read: boolean | null;
   createdAt: string;
 }
-
+export const dynamic ="force-dynamic"
 export async function GET(req: Request) {
   const { userId } = await auth();
   if (!userId) {

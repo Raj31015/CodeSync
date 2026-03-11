@@ -45,7 +45,7 @@ const projectLanding = () => {
   console.log(ownappsquery.data)
   console.log(AppsQuery.data)
   console.log(sharedApps)
-  
+  console.log("columsn type",Array.isArray(columns),columns)
   
    return (
        <>

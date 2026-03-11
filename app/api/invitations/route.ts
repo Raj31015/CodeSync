@@ -53,7 +53,7 @@ export interface InboxResponse {
   requestsSent: InboxRequest[];
   activity: InboxActivityItem[];
 }
-
+export const dynamic ="force-dynamic"
 export async function GET() {
   const { userId } = await auth();
   if (!userId) {
@@ -237,9 +237,34 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { toUserId, projectId, message, role } = body ?? {};
+  // support either a Clerk user id or a username so callers can work with
+  // human‑readable handles. the client may submit both, but the server
+  // resolves in this order:
+  //   1. use toUserId if provided
+  //   2. otherwise look up the given username via Clerk
+  const { toUserId, toUsername, projectId, message, role } = body ?? {};
 
-  if (!toUserId || !projectId) {
+  let resolvedToUserId: string | undefined = toUserId;
+
+  const client = await clerkClient();
+
+  if (!resolvedToUserId && toUsername) {
+    // Clerk's query parameter will do a fuzzy search; we filter for exact
+    // username to avoid accidental matches.
+    const usersResult = await client.users.getUserList({
+      query: toUsername,
+      limit: 5,
+    });
+    const match = usersResult.data.find((u) => u.username === toUsername);
+    if (!match) {
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+      });
+    }
+    resolvedToUserId = match.id;
+  }
+
+  if (!resolvedToUserId || !projectId) {
     return new Response(JSON.stringify({ error: "Invalid input" }), {
       status: 400,
     });
@@ -260,7 +285,7 @@ export async function POST(req: Request) {
   await db.insert(invitations).values({
     id,
     fromUserId: userId,
-    toUserId,
+    toUserId: resolvedToUserId,
     projectId,
     role: invitedRole,
     status: "pending",
@@ -270,7 +295,7 @@ export async function POST(req: Request) {
   // Notification for the invited user
   await db.insert(notifications).values({
     id: createId(),
-    userId: toUserId,
+    userId: resolvedToUserId,
     type: "invitation",
     referenceId: id,
     message: "You have a new project invitation",

@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useCreateInvitation } from "@/features/invitations/api/useCreateInvitation";
 import { useCreateJoinRequest } from "@/features/join-requests/api/useCreateJoinRequest";
+import { useDeleteApp } from "@/features/apps/api/useDeleteApp";
 
 export type App={
     appId:string,
@@ -125,37 +126,39 @@ export const columns:ColumnDef<App>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     enableHiding: false,
     cell: ({ row }) => {
       const router = useRouter()
       const app = row.original
       const [inviteOpen, setInviteOpen] = useState(false);
       const [requestOpen, setRequestOpen] = useState(false);
-      const [toUserId, setToUserId] = useState("");
+      const [deleteOpen, setDeleteOpen] = useState(false);
+      const [recipient, setRecipient] = useState("");
       const [inviteMessage, setInviteMessage] = useState("");
       const [inviteRole, setInviteRole] = useState<"viewer" | "editor" | "owner">("viewer");
       const [requestRole, setRequestRole] = useState<"viewer" | "editor" | "owner">("viewer");
 
       const createInvitation = useCreateInvitation();
       const createJoinRequest = useCreateJoinRequest();
+      const deleteApp = useDeleteApp();
 
       const handleSendInvite = () => {
-        if (!toUserId) return;
+        if (!recipient) return;
         createInvitation.mutate(
           {
-            toUserId,
+            // we treat the input as a username; the API will resolve it to an
+            // id so we don't have to worry about Clerk internals here
+            toUsername: recipient,
             projectId: app.appId,
             message: inviteMessage || undefined,
             role: inviteRole,
           },
-          {
-            onSuccess: () => {
-              setInviteOpen(false);
-              setToUserId("");
-              setInviteMessage("");
-            },
-          }
+     
         );
+             setInviteOpen(false);
+            setRecipient("");
+            setInviteMessage("");
       };
 
       const handleSendJoinRequest = () => {
@@ -197,8 +200,45 @@ export const columns:ColumnDef<App>[] = [
               <DropdownMenuItem onClick={() => setRequestOpen(true)}>
                 Request access to this app
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-red-400 hover:text-red-600"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete project
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* delete confirmation dialog */}
+          <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <DialogContent className="bg-[#2b2e3b] text-white border border-gray-600">
+              <DialogHeader>
+                <DialogTitle>Delete project</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to permanently delete “{app.name}”? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="text-red-400"
+                  onClick={() => {
+                    deleteApp.mutate({ appId: app.appId });
+                    setDeleteOpen(false);
+                  }}
+                  disabled={deleteApp.isPending}
+                >
+                  {deleteApp.isPending ? "Deleting…" : "Delete"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
             <DialogContent className="bg-[#2b2e3b] text-white border border-gray-600">
@@ -210,9 +250,9 @@ export const columns:ColumnDef<App>[] = [
               </DialogHeader>
               <div className="space-y-3 py-2">
                 <Input
-                  placeholder="Enter user ID to invite"
-                  value={toUserId}
-                  onChange={(e) => setToUserId(e.target.value)}
+                  placeholder="Enter username or user ID"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
                 />
                 <Input
                   placeholder="Optional message"
@@ -243,7 +283,7 @@ export const columns:ColumnDef<App>[] = [
                 </Button>
                 <Button
                   onClick={handleSendInvite}
-                  disabled={!toUserId || createInvitation.isPending}
+                  disabled={!recipient || createInvitation.isPending}
                 >
                   Send invite
                 </Button>

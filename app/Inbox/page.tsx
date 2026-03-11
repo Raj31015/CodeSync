@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import HomeSidebar from "@/components/homeSidebar";
 import { Separator } from "@/components/ui/separator";
-import { useInbox } from "@/features/invitations/api/useInbox";
+import { useInvitesReceived } from "@/features/invitations/api/useInvitesReceived";
+import { useRequestsReceived } from "@/features/invitations/api/useRequestReceived";
+import { useRequestsSent } from "@/features/invitations/api/useRequestsSent";
+import { useActivity } from "@/features/invitations/api/useActivity";
 import { useUpdateInvitation } from "@/features/invitations/api/useUpdateInvitation";
 import { useUpdateJoinRequest } from "@/features/join-requests/api/useUpdateJoinRequest";
 import { useCreateJoinRequest } from "@/features/join-requests/api/useCreateJoinRequest";
@@ -16,7 +19,12 @@ type Filter = "invites" | "requests" | "activity";
 
 export default function InvitesPage() {
   const [filter, setFilter] = useState<Filter>("invites");
-  const { data, isLoading } = useInbox();
+  const { data: invites = [], isLoading: invitesLoading } = useInvitesReceived();
+const { data: requestsReceived = [], isLoading: receivedLoading } = useRequestsReceived();
+const { data: requestsSent = [], isLoading: sentLoading } = useRequestsSent();
+const { data: activity = [], isLoading: activityLoading } = useActivity();
+const isLoading =
+  invitesLoading || receivedLoading || sentLoading || activityLoading;
   const updateInvitation = useUpdateInvitation();
   const updateJoinRequest = useUpdateJoinRequest();
   const createJoinRequest = useCreateJoinRequest();
@@ -24,7 +32,7 @@ export default function InvitesPage() {
   const [requestRole, setRequestRole] = useState<"viewer" | "editor" | "owner">("viewer");
 
   const renderList = () => {
-    if (isLoading || !data) {
+    if (isLoading) {
       return (
         <p className="text-sm text-muted-foreground animate-pulse">
           Loading inbox...
@@ -34,14 +42,14 @@ export default function InvitesPage() {
 
     switch (filter) {
       case "invites":
-        if (!data.invites.length) {
+        if (!invites.length) {
           return (
             <p className="text-sm text-muted-foreground">
               No invitations yet.
             </p>
           );
         }
-        return data.invites.map((i) => (
+        return invites.map((i) => (
           <div
             key={i.id}
             className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 w-[80%]"
@@ -86,7 +94,7 @@ export default function InvitesPage() {
           </div>
         ));
       case "requests":
-        if (!data.requestsReceived.length && !data.requestsSent.length) {
+        if (!requestsReceived.length && !requestsSent.length) {
           return (
             <p className="text-sm text-muted-foreground">
               No join requests yet.
@@ -96,12 +104,12 @@ export default function InvitesPage() {
 
         return (
           <div className="flex flex-col gap-4 w-[80%]">
-            {data.requestsReceived.length > 0 && (
+            {requestsReceived.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-muted-foreground">
                   Received
                 </h3>
-                {data.requestsReceived.map((r) => (
+                {requestsReceived.map((r) => (
                   <div
                     key={r.id}
                     className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50"
@@ -148,12 +156,12 @@ export default function InvitesPage() {
               </div>
             )}
 
-            {data.requestsSent.length > 0 && (
+            {requestsSent.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-muted-foreground">
                   Sent
                 </h3>
-                {data.requestsSent.map((r) => (
+                {requestsSent.map((r) => (
                   <div
                     key={r.id}
                     className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50"
@@ -175,14 +183,14 @@ export default function InvitesPage() {
           </div>
         );
       case "activity":
-        if (!data.activity.length) {
+        if (activity.length) {
           return (
             <p className="text-sm text-muted-foreground">
               No recent activity.
             </p>
           );
         }
-        return data.activity.map((a) => (
+        return activity.map((a) => (
           <div
             key={a.id}
             className="p-3 border rounded-lg hover:bg-muted/50 w-[80%]"

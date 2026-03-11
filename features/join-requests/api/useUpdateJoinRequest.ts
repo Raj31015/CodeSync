@@ -11,6 +11,7 @@ export const useUpdateJoinRequest = () => {
   return useMutation({
     mutationFn: async ({ requestId, action }: UpdateJoinRequestPayload) => {
       const res = await fetch("/api/join-requests", {
+        cache:"no-store",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requestId, action }),
@@ -21,8 +22,8 @@ export const useUpdateJoinRequest = () => {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inbox"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["inbox"],refetchType:"active" });
+      queryClient.invalidateQueries({ queryKey: ["notifications"],exact:false,refetchType:"active" });
     },
   });
 };

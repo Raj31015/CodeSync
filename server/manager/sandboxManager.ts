@@ -12,7 +12,8 @@ export async function runCodeSandboxed(
 ) {
   const lang = LANGUAGES[language];
   if (!lang) throw new Error("Unsupported language");
-
+  console.log("LANGUAGE RECEIVED:", language);
+console.log("LANG CONFIG:", LANGUAGES[language]);
   const tempDir = path.join(process.cwd(), "temp", socket.id);
   await fs.mkdir(tempDir, { recursive: true });
 

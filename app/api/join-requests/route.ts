@@ -9,7 +9,7 @@ import {
 } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { Getrole } from "@/hooks/getrole";
-
+export const dynamic ="force-dynamic"
 // Create a new join request for a project
 export async function POST(req: Request) {
   const { userId } = await auth();

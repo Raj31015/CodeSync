@@ -1,17 +1,22 @@
 import {useQuery} from "@tanstack/react-query"
 import type { App } from "@/app/api/project/route"
-export const useGetApps=(limit?:number)=>{
-    const query = useQuery<App[]>({
+export const useGetApps = (limit?: number) => {
+  return useQuery<App[]>({
     queryKey: ["apps", limit ?? "all"],
     queryFn: async (): Promise<App[]> => {
-      const response = await fetch("/api/project")
+      const url = limit
+        ? `/api/project?limit=${limit}`
+        : `/api/project`
+
+      const response = await fetch(url)
+
       if (!response.ok) {
         throw new Error("Error fetching apps")
       }
-      const data: App[] = await response.json()
-      return data
+
+      const result = await response.json()
+
+      return Array.isArray(result) ? result : []
     },
   })
-
-    return query
 }

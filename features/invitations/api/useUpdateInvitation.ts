@@ -11,6 +11,7 @@ export const useUpdateInvitation = () => {
   return useMutation({
     mutationFn: async ({ invitationId, action }: UpdateInvitationPayload) => {
       const res = await fetch("/api/invitations", {
+        cache:"no-store",
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ invitationId, action }),
@@ -21,8 +22,8 @@ export const useUpdateInvitation = () => {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["inbox"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["inbox"],refetchType:"active" });
+      queryClient.invalidateQueries({ queryKey: ["notifications"],exact:false,refetchType:"active" });
     },
   });
 };

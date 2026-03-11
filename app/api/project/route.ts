@@ -6,6 +6,7 @@ import { apps, collaborators } from "@/db/schema";
 import { and, eq, inArray,desc } from "drizzle-orm";
 import { insertAppSchema } from "@/db/schema";
 import { Getrole } from "@/hooks/getrole";
+import { NextResponse } from "next/server";
 export async function GET(req:Request){
   const {searchParams}=new URL(req.url)
  const limitParam = searchParams.get("limit");
@@ -14,7 +15,7 @@ export async function GET(req:Request){
   const  userId = (await auth()).userId;
   
   if (!userId) {
-    return new Response(JSON.stringify({ authenticated: false }), {
+    return new NextResponse(JSON.stringify({ authenticated: false }), {
       status: 401,
     });
   }
@@ -24,7 +25,7 @@ export async function GET(req:Request){
   const appIds = Applist.map((row) => row.appId);
  
     if (appIds.length === 0) {
-    return new Response(JSON.stringify({ data: [] }));
+    return new NextResponse(JSON.stringify({ data: [] }));
   }
 
   const applist= db.select({
@@ -33,8 +34,15 @@ export async function GET(req:Request){
     userId:apps.userId,
     createdAt:apps.createdAt,
     updatedAt:apps.updatedAt,
-    updatedBy:apps.updatedBy
-  }).from(apps)
+    updatedBy:apps.updatedBy,
+    // include role of current user from collaborators table
+    myRole: collaborators.role,
+  })
+    .from(apps)
+    .leftJoin(collaborators, and(
+      eq(collaborators.app_id, apps.appId),
+      eq(collaborators.userId, userId)
+    ))
     .where(
           inArray(apps.appId,appIds)
         )
@@ -56,14 +64,14 @@ export async function GET(req:Request){
     }
   });
     
- return new Response(JSON.stringify(finaldata))
+ return new NextResponse(JSON.stringify(finaldata))
 }
 export async function POST(req:Request){
   
   const  userId = (await auth()).userId;
 
   if (!userId) {
-    return new Response(JSON.stringify({ authenticated: false }), {
+    return new NextResponse(JSON.stringify({ authenticated: false }), {
       status: 401,
     });
   }
@@ -77,7 +85,7 @@ export async function POST(req:Request){
   const body=await req.json()
  const res=schema.safeParse(body)
  if (!res.success) {
-  return Response.json({ error: res.error.format() }, { status: 400 });
+  return NextResponse.json({ error: res.error.format() }, { status: 400 });
 }
  const {name}=res.data
  const appId=createId()
@@ -98,7 +106,7 @@ export async function POST(req:Request){
     app_id:appId,
     role:"owner"
   })
-   return new Response(JSON.stringify({data}))
+   return new NextResponse(JSON.stringify({data}))
 
 }
 export type App={
@@ -114,7 +122,7 @@ export async function PATCH(req:Request){
  const  userId = (await auth()).userId;
   
   if (!userId) {
-    return new Response(JSON.stringify({ authenticated: false }), {
+    return new NextResponse(JSON.stringify({ authenticated: false }), {
       status: 401,
     });
   }  
@@ -123,12 +131,12 @@ export async function PATCH(req:Request){
   const body=await req.json()
  const res=schema.safeParse(body)
    if (!res.success) {
-    return Response.json({ error: 'Invalid input', issues: res.error}, { status: 400 });
+    return NextResponse.json({ error: 'Invalid input', issues: res.error}, { status: 400 });
   }
   const {appId,name}=res.data
  const role=await Getrole(appId,userId)
 if (role === "viewer") {
-  return Response.json({ error: "Unauthorized" }, { status: 403 });
+  return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 }
 
   const data=await db.update(apps)
@@ -140,14 +148,14 @@ if (role === "viewer") {
               eq(apps.userId,userId)
             )).returning()
   
-    return new Response(JSON.stringify({data}))
+    return new NextResponse(JSON.stringify({data}))
 
 }
 export async function DELETE(req:Request){
  const  userId = (await auth()).userId;
   
   if (!userId) {
-    return new Response(JSON.stringify({ authenticated: false }), {
+    return new NextResponse(JSON.stringify({ authenticated: false }), {
       status: 401,
     });
   }  
@@ -156,7 +164,7 @@ export async function DELETE(req:Request){
   const body=await req.json()
  const res=schema.safeParse(body)
    if (!res.success) {
-    return Response.json({ error: 'Invalid input', issues: res.error}, { status: 400 });
+    return NextResponse.json({ error: 'Invalid input', issues: res.error}, { status: 400 });
   }
   const {appId}=res.data
  const result = await db
@@ -170,7 +178,7 @@ export async function DELETE(req:Request){
   );
 
 if (!result[0] || result[0].role !== "owner") {
-  return Response.json({ error: "Unauthorized" }, { status: 403 });
+  return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 }
 
   const data=await db.delete(apps)
@@ -180,6 +188,6 @@ if (!result[0] || result[0].role !== "owner") {
             )).returning()
   const {name} =data[0];
   
-    return new Response(JSON.stringify({name}))
+    return new NextResponse(JSON.stringify({name}))
 
 }

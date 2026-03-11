@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProviders from "@/providers/query-provider";
 import {ClerkProvider} from "@clerk/nextjs"
 import {SidebarInset, SidebarProvider,SidebarTrigger } from "@/components/ui/sidebar";
+import { ToastProvider } from "@/components/ui/toast";
 import { Providers } from "@/providers/LbProvider";
 import { AppSidebar } from "@/components/app-sidebar";
 const geistSans = Geist({
@@ -38,16 +39,14 @@ export default function RootLayout({
           
         <QueryProviders>
           <Providers>
-         
-          <div className="flex flex-col fixed inset-0 overflow-hidden">
-            
-           {children}
-          </div>
-          
-        
-        </Providers>
-        </QueryProviders>
-        
+            {/* toast container lives at root so any component can fire a message */}
+            <ToastProvider>
+              <div className="flex flex-col fixed inset-0 overflow-hidden">
+                {children}
+              </div>
+            </ToastProvider>
+          </Providers>
+          </QueryProviders>
         </SidebarProvider>
         
        

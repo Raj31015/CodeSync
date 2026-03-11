@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { App } from "@/app/api/project/route"; // `App` from `apps.$inferSelect`
-
 export const useDeleteApp = () => {
   const queryClient = useQueryClient();
 
@@ -23,7 +22,7 @@ export const useDeleteApp = () => {
 
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['apps'] });
-            queryClient.invalidateQueries({ queryKey: ['app',data.appId] });
+      queryClient.invalidateQueries({ queryKey: ['app',data.appId] });
 
       console.log("Success");
     },

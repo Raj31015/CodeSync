@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/toast";
 import type { App } from "@/app/api/project/route"; // `App` from `apps.$inferSelect`
 
 export const useEditApp = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation<App, Error, {appId:string,name:string}>({
     mutationFn: async ({appId,name}) => {
@@ -23,9 +25,11 @@ export const useEditApp = () => {
 
     onSuccess: ({appId}) => {
       queryClient.invalidateQueries({ queryKey: ['apps'] });
-            queryClient.invalidateQueries({ queryKey: ['app',appId] });
-
-      console.log("Success");
+      queryClient.invalidateQueries({ queryKey: ['app',appId] });
+      toast({ type: 'success', title: 'App updated' });
+    },
+    onError: (err: any) => {
+      toast({ type: 'error', title: 'Update failed', description: err.message });
     },
   });
 };

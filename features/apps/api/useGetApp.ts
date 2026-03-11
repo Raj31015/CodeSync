@@ -11,9 +11,9 @@ export const useGetApp=(appId:string)=>{
             if(!response.ok){
                 throw new Error("Error")
             }
-            const data=await response.json()
+            const result=await response.json()
             
-            return data
+            return result.data
         },
         enabled:!!appId
     })

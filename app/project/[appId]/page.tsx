@@ -13,7 +13,12 @@ import { useGetApp } from "@/features/apps/api/useGetApp";
 
 const Home = () => {
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
-  const { appId } = useParams();
+const params = useParams();
+const appId = params?.appId;
+
+if (!appId || typeof appId !== "string") {
+  return null; // or loading state
+}
   const router = useRouter();
 
   if (typeof appId !== "string") {
@@ -34,7 +39,12 @@ const Home = () => {
     (fileToLoad && fileQuery.isLoading);
 
   const file = fileQuery.data ?? null;
-
+  console.log({
+  appLoading: appQuery.isLoading,
+  filesLoading: filesQuery.isLoading,
+  fileLoading: fileQuery.isLoading,
+  fileToLoad
+});
   if (!selectedFileId && !latestFile) {
     return (
       <div>
@@ -112,7 +122,7 @@ const Home = () => {
       />
       <Room roomId={fileToLoad}>
         <CollaborativeEditor file={file} />
-      </Room>
+      </Room> 
     </div>
     </div>
    

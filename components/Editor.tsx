@@ -48,14 +48,15 @@ export function CollaborativeEditor({ file }: Props) {
   const filename = file.name;
   const extension = filename.split(".").pop() ?? "js";
   const [langFunc, langName, version] = extensionToLanguage(extension);
-
-
   const userInfo = useSelf((me) => me.info);
   useEffect(() => {
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!,{transports:["websocket"]}); // your Next+Socket.IO server
   socketRef.current=socket
   socketRef.current.on("connect", () => {
     console.log("🟢 Connected to server:", socket.id);
+      console.log("Language details:", { extension, langName, version });
+
+
   });
 
   // When the backend sends code execution results
@@ -126,16 +127,20 @@ useEffect(() => {
   if (!element || !userInfo || !file) return;
 
   const ydoc = provider.getYDoc();
-  const ytext = ydoc.getText("content");
+  const ytextInstance = ydoc.getText("content");
 
-  const undoManager = new Y.UndoManager(ytext);
+  // keep a reference in state so other handlers can access
+  setYText(ytextInstance);
 
-  const isFresh = ytext.toString().trim().length === 0;
+  const undoManager = new Y.UndoManager(ytextInstance);
+  setYUndoManager(undoManager);
+
+  const isFresh = ytextInstance.toString().trim().length === 0;
   const isDBContentAvailable = !!file.content;
 
   if (isFresh && isDBContentAvailable && file.content) {
-    ytext.delete(0, ytext.length);
-    ytext.insert(0, file.content);
+    ytextInstance.delete(0, ytextInstance.length);
+    ytextInstance.insert(0, file.content);
   }
 
   provider.awareness.setLocalStateField("user", {
@@ -145,11 +150,11 @@ useEffect(() => {
   });
 
   const state = EditorState.create({
-    doc: ytext.toString(),
+    doc: ytextInstance.toString(),
     extensions: [
       basicSetup,
       langFunc as LanguageSupport,
-      yCollab(ytext, provider.awareness, { undoManager }),
+      yCollab(ytextInstance, provider.awareness, { undoManager }),
     ],
   });
 
