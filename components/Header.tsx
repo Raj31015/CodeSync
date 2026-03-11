@@ -118,7 +118,7 @@ export default function Header() {
 
         {/* Search results with invite controls */}
         {users.length > 0 && (
-          <ul className="absolute top-full mt-2 w-80 bg-background border border-gray-200 rounded-md shadow-md max-h-72 overflow-auto z-40">
+          <ul className="absolute top-full mt-2 w-80 bg-[#1a1d2e] border border-gray-200 rounded-md shadow-md max-h-72 overflow-auto z-40">
             {users.map((user) => (
               <li
                 key={user.id}
@@ -131,7 +131,7 @@ export default function Header() {
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-muted-foreground">Invite to</span>
                     <select
-                      className="border bg-background rounded px-2 py-1 text-xs"
+                      className="border bg-blue-600/50 rounded px-2 py-1 text-xs"
                       value={selectedAppId ?? apps[0].appId}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         setSelectedAppId(e.target.value)
