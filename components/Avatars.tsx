@@ -25,7 +25,7 @@ export function Avatars() {
 export function Avatar({ picture, name }: { picture: string; name: string }) {
   return (
     <div
-      className="relative flex items-center justify-center w-[42px] h-[42px] bg-gray-400 rounded-full border-4 border-white ml-[-0.75rem] hover:before:opacity-100 before:absolute before:top-full before:mt-2 before:opacity-0 before:transition-opacity before:duration-150 before:text-white before:text-xs before:rounded before:py-[5px] before:px-[10px] before:bg-black before:whitespace-nowrap"
+      className="relative flex items-center justify-center w-[42px] h-[42px] bg-gray-400 rounded-full border-4 border-white ml-[-0.75rem] hover:before:opacity-100 before:content-[attr(data-tooltip)] before:absolute before:top-full before:mt-2 before:opacity-0 before:transition-opacity before:duration-150 before:text-white before:text-xs before:rounded before:py-[5px] before:px-[10px] before:bg-black before:whitespace-nowrap"
       data-tooltip={name}
     >
       <img src={picture} className="w-full h-full rounded-full" alt={name} />

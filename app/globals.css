@@ -61,3 +61,46 @@ body{
   background-color: #44475a !important; /* selected item bg */
   color: white;
 }
+.cm-ySelectionCaret {
+  z-index: 9999 !important;
+}
+
+.cm-ySelectionInfo {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 9999 !important;
+}
+.cm-ySelectionInfo {
+  background: #2563eb;
+  color: white;
+}
+.cm-editor .cm-cursorLayer {
+  z-index: 50 !important;
+}
+
+.cm-editor .cm-presenceCursor {
+  position: relative;
+}
+
+.cm-editor .cm-presenceCursorLabel {
+  position: absolute;
+  top: -1.4em;
+  left: 0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  color: white;
+  z-index: 1000;
+}
+.cm-editor {
+  position: relative;
+  overflow: visible !important;
+}
+
+.cm-scroller {
+  overflow: auto;
+}

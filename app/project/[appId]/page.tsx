@@ -58,7 +58,7 @@ if (!appId || typeof appId !== "string") {
             />
             <h1 className="text-xl ml-4">{appQuery.data?.name ?? "App"}</h1>
           </div>
-          <Button>Run</Button>
+       
         </header>
         <div className="h-screen flex">
           <SidebarFileTree

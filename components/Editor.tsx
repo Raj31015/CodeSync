@@ -195,7 +195,7 @@ useEffect(() => {
   }, [output]);
 
   return (
-    <div className="flex flex-col w-full h-full rounded-xl bg-[#1E1E2E] text-[#D4D4D4] overflow-hidden">
+    <div className="flex flex-col w-full h-full rounded-xl bg-[#1E1E2E] text-[#D4D4D4] overflow-visible">
       <div className="flex justify-between items-center p-2 border-b border-gray-700">
         <div className="flex items-center">
           {yUndoManager && <Toolbar yUndoManager={yUndoManager} />}
@@ -212,7 +212,7 @@ useEffect(() => {
       <ResizablePanelGroup direction="vertical">
         {/* Code editor area - scrollable */}
         <ResizablePanel defaultSize={60}>
-          <div className="relative h-full overflow-auto" ref={ref}></div>
+          <div className="relative h-full" ref={ref}></div>
         </ResizablePanel>
 
         {/* Output */}
